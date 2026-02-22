@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ireland 2026 — Trip Itinerary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+  :root {
+    --green-dark: #1a5632;
+    --green-mid: #2d7a4f;
+    --green-light: #e8f5ee;
+    --green-accent: #34a853;
+    --orange: #e67e22;
+    --orange-light: #fef3e2;
+    --cream: #faf8f5;
+    --text: #2c3e50;
+    --text-light: #5d6d7e;
+    --border: #e0e0e0;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+    color: white;
+    padding: 60px 24px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 60%);
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    font-weight: 300;
+    position: relative;
+  }
+  .hero .dates {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 20px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    position: relative;
+  }
+
+  /* NAV */
+  .day-nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    -webkit-overflow-scrolling: touch;
+  }
+  .day-nav a {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-light);
+    background: var(--green-light);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .day-nav a:hover, .day-nav a.active {
+    background: var(--green-dark);
+    color: white;
+  }
+
+  /* MAIN */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  /* OVERVIEW CARDS */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .overview-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .overview-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-light); margin-bottom: 4px; }
+  .overview-card .value { font-size: 1rem; font-weight: 600; color: var(--green-dark); }
+
+  /* DAY SECTION */
+  .day-section {
+    margin-bottom: 28px;
+    scroll-margin-top: 70px;
+  }
+  .day-header {
+    background: var(--white);
+    border-radius: 16px 16px 0 0;
+    padding: 20px 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow);
+    user-select: none;
+    position: relative;
+    border-left: 5px solid var(--green-mid);
+  }
+  .day-header:hover { background: #fdfdfd; }
+  .day-number {
+    width: 48px;
+    height: 48px;
+    background: var(--green-dark);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .day-meta h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  .day-meta .day-sub {
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+  .day-toggle {
+    margin-left: auto;
+    font-size: 1.4rem;
+    color: var(--text-light);
+    transition: transform 0.3s;
+  }
+  .day-section.open .day-toggle { transform: rotate(180deg); }
+
+  .day-body {
+    background: var(--white);
+    border-radius: 0 0 16px 16px;
+    padding: 0 24px 24px;
+    box-shadow: var(--shadow);
+    display: none;
+  }
+  .day-section.open .day-body { display: block; }
+
+  /* LODGING BAR */
+  .lodging-bar {
+    background: var(--green-light);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+  }
+  .lodging-bar .icon { font-size: 1.1rem; }
+  .lodging-bar strong { color: var(--green-dark); }
+
+  /* TIME BLOCK */
+  .time-block {
+    margin-bottom: 20px;
+  }
+  .time-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--green-mid);
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--green-light);
+  }
+
+  /* ACTIVITY CARD */
+  .activity {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--green-accent);
+    transition: transform 0.15s;
+  }
+  .activity:hover { transform: translateX(3px); }
+  .activity.food { border-left-color: var(--orange); }
+  .activity.nightlife { border-left-color: #8e44ad; }
+  .activity.outdoor { border-left-color: #2980b9; }
+  .activity.driving { border-left-color: #7f8c8d; background: #f5f5f5; }
+
+  .activity-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .activity-title a {
+    color: var(--green-dark);
+    text-decoration: none;
+  }
+  .activity-title a:hover { text-decoration: underline; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .badge.free { background: #d5f5e3; color: #1a7a3a; }
+  .badge.price { background: var(--orange-light); color: #b35900; }
+  .badge.time { background: #eaf2f8; color: #2471a3; }
+  .badge.tip { background: #fdebd0; color: #935116; }
+  .badge.brian { background: #e8daef; color: #6c3483; }
+
+  .activity-desc {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    line-height: 1.55;
+  }
+
+  /* ALTERNATIVES */
+  .alternatives {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    border: 1px dashed var(--border);
+  }
+  .alternatives-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+    margin-bottom: 6px;
+  }
+  .alternatives ul { list-style: none; padding: 0; }
+  .alternatives li {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    padding: 3px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+  .alternatives li::before {
+    content: '•';
+    position: absolute;
+    left: 4px;
+    color: var(--green-mid);
+  }
+
+  /* SECTION DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* PRO TIPS */
+  .pro-tip {
+    background: var(--orange-light);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 0.85rem;
+    border-left: 3px solid var(--orange);
+  }
+  .pro-tip strong { color: #935116; }
+
+  /* ALERT */
+  .alert {
+    background: #fdedec;
+    border-left: 3px solid #e74c3c;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 0.85rem;
+  }
+  .alert strong { color: #c0392b; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--text-light);
+    font-size: 0.8rem;
+  }
+
+  /* PRINT */
+  @media print {
+    .day-nav { display: none; }
+    .day-body { display: block !important; }
+    .day-header { break-inside: avoid; }
+    .hero { padding: 24px; }
+  }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .hero { padding: 40px 16px 36px; }
+    .day-header { padding: 14px 16px; }
+    .day-body { padding: 0 16px 20px; }
+    .overview-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Ireland 2026</h1>
+  <div class="subtitle">Mark, Brian &amp; Lauren's Adventure</div>
+  <div class="dates">May 10 – 17, 2026 &nbsp;·&nbsp; 7 Days</div>
+</div>
+
+<nav class="day-nav" id="dayNav">
+  <a href="#overview">Overview</a>
+  <a href="#day0">Travel Day</a>
+  <a href="#day1">Day 1 — Dublin</a>
+  <a href="#day2">Day 2 — Dublin</a>
+  <a href="#day3">Day 3 — Galway</a>
+  <a href="#day4">Day 4 — Cliffs &amp; Islands</a>
+  <a href="#day5">Day 5 — Ring of Kerry</a>
+  <a href="#day6">Day 6 — Cork → Kilkenny</a>
+  <a href="#day7">Day 7 — Kilkenny → Home</a>
+</nav>
+
+<div class="container">
+
+<!-- ============ OVERVIEW ============ -->
+<div id="overview" style="scroll-margin-top:70px;">
+  <div class="overview-grid">
+    <div class="overview-card">
+      <div class="label">Route</div>
+      <div class="value">Dublin → Galway → Kerry → Cork → Kilkenny → Dublin</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Dublin</div>
+      <div class="value">Handels Hotel · May 11–13</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Galway</div>
+      <div class="value">The Snug Townhouse · May 13–15</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Cork</div>
+      <div class="value">Maldron Hotel · May 15–16</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Kilkenny</div>
+      <div class="value">Kilmore Guesthouse · May 16–17</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Total Driving</div>
+      <div class="value">~10 hours across the trip</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DAY 0: TRAVEL ============ -->
+<div class="day-section" id="day0">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">✈</div>
+    <div class="day-meta">
+      <h2>Saturday, May 10 — Travel Day</h2>
+      <div class="day-sub">Raleigh → Dublin (overnight flight)</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+    <div class="activity driving">
+      <div class="activity-title">Departs Raleigh at 8:25 PM</div>
+      <div class="activity-desc">Overnight flight. Arrives Dublin 8:45 AM on May 11. Sleep on the plane — the trip starts the moment you land.</div>
+    </div>
+    <div class="pro-tip"><strong>Tip:</strong> Download the Aircoach or Dublin Express app before you leave. Buses to city centre run every 10–15 min from the airport and cost about €9. Faster and cheaper than a taxi.</div>
+    <div class="pro-tip"><strong>Tip:</strong> Get a Leap Card at the airport for discounted buses, trams (Luas), and DART trains throughout Dublin.</div>
+  </div>
+</div>
+
+<!-- ============ DAY 1: DUBLIN ============ -->
+<div class="day-section" id="day1">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">1</div>
+    <div class="day-meta">
+      <h2>Sunday, May 11 — Dublin</h2>
+      <div class="day-sub">Arrive, settle in, explore Temple Bar &amp; city centre</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+    <div class="lodging-bar"><span class="icon">🏨</span> <strong>Handels Hotel</strong> — Temple Bar area &nbsp;·&nbsp; Confirmation: DBM4469596136644 (Brian booked)</div>
+
+    <div class="time-block">
+      <div class="time-label">Morning — Arrive &amp; Get Oriented</div>
+      <div class="activity driving">
+        <div class="activity-title">Airport → City Centre <span class="badge time">~30 min</span> <span class="badge price">€9</span></div>
+        <div class="activity-desc">Aircoach or Dublin Express bus to Temple Bar area. Runs every 10–15 min. Check into Handels Hotel (or drop bags if too early).</div>
+      </div>
+      <div class="activity food">
+        <div class="activity-title">Brunch at Queen of Tarts <span class="badge price">€12–18</span></div>
+        <div class="activity-desc">A 25-year-old Dublin institution right near Temple Bar. Great baked goods, sandwiches, and coffee to shake off the jet lag.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Afternoon — Walking Tour &amp; Temple Bar</div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://vikinglegacytrails.ie/" target="_blank">Viking Legacy Walking Tour</a> <span class="badge price">€35–70</span> <span class="badge time">2 hrs</span> <span class="badge brian">Brian's pick</span></div>
+        <div class="activity-desc">A costumed Viking guide takes you through Dublin Castle grounds, Christ Church Cathedral area, and Temple Bar. Great reviews and a solid orientation to the city. The €70 price includes a meal deal at a 17th-century tavern at the last stop. Book in advance.</div>
+      </div>
+      <div class="alert"><strong>Heads up:</strong> Dublin Castle is closed May 5 – Dec 31, 2026 for the EU Presidency. The walking tour may adjust its route — confirm when booking. You can still see the exterior and grounds.</div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://christchurchcathedral.ie/" target="_blank">Christ Church Cathedral</a> <span class="badge price">€12</span> <span class="badge time">1 hr</span> <span class="badge brian">Brian's pick</span></div>
+        <div class="activity-desc">Self-guided tour with audio guide. Beautiful 1,000-year-old interior, medieval crypt, and the famous "mummified cat and rat." Open 9:30 AM – 5:00 PM. Could also be covered by the walking tour.</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">Wander Temple Bar &amp; the Quays</div>
+        <div class="activity-desc">Walk along the River Liffey, cross Ha'penny Bridge, explore the colorful streets around your hotel. Low-key way to get your bearings without a tight schedule.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Evening — Dinner &amp; Pubs</div>
+      <div class="activity food">
+        <div class="activity-title"><a href="https://brazenhead.com/" target="_blank">The Brazen Head</a> for dinner <span class="badge price">€15–25</span> <span class="badge brian">Brian's pick</span></div>
+        <div class="activity-desc">Dublin's oldest pub (est. 1198). Good pub grub, live trad music most nights, and a courtyard area. 10-minute walk from Temple Bar.</div>
+      </div>
+      <div class="activity nightlife">
+        <div class="activity-title">Pub Crawl: Porterhouse → Cobblestone</div>
+        <div class="activity-desc"><strong>The Porterhouse</strong> (Temple Bar) — Ireland's first pub brewery, live music, copper-piped interior. Then head to <strong>The Cobblestone</strong> in Smithfield — Dublin's best trad music pub with sessions every night. It's about a 15-minute walk north; worth the trip.</div>
+      </div>
+    </div>
+
+    <div class="alternatives">
+      <div class="alternatives-title">Other dinner options near Temple Bar</div>
+      <ul>
+        <li><strong>Gallagher's Boxty House</strong> — Traditional potato pancakes (boxty), very Irish <span class="badge brian">Brian's pick</span></li>
+        <li><strong>Bunsen</strong> — Excellent no-frills burgers, casual</li>
+        <li><strong>DiFontaine's</strong> — Huge pizza slices from €5.50, late-night spot</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DAY 2: DUBLIN ============ -->
+<div class="day-section" id="day2">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">2</div>
+    <div class="day-meta">
+      <h2>Monday, May 12 — Dublin</h2>
+      <div class="day-sub">Guinness, Kilmainham, and a full day to explore</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+    <div class="lodging-bar"><span class="icon">🏨</span> <strong>Handels Hotel</strong> — Second night</div>
+
+    <div class="time-block">
+      <div class="time-label">Morning — Guinness &amp; Kilmainham</div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://www.guinness-storehouse.com/" target="_blank">Guinness Storehouse</a> <span class="badge price">~€26–30</span> <span class="badge time">1.5–2 hrs</span> <span class="badge brian">Brian's pick</span></div>
+        <div class="activity-desc">Seven floors of exhibits on Ireland's most famous export. Ends at the Gravity Bar on top — 360° views of Dublin with a free pint of Guinness included. Book online in advance to skip the queue and reserve a time slot. Go early (9–10 AM) to beat crowds.</div>
+      </div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://www.kilmainhamgaolmuseum.ie/plan-a-visit/" target="_blank">Kilmainham Gaol</a> <span class="badge price">€10</span> <span class="badge time">90 min</span> <span class="badge brian">Brian's pick</span></div>
+        <div class="activity-desc">Powerful guided tour of the prison where leaders of Ireland's independence movement were held and executed. About a 20-minute walk from Guinness Storehouse (or a quick taxi). Open 9:00 AM – 5:00 PM. This is the most impactful historical site in Dublin — well worth it even if you're not a history buff.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Afternoon — Pick Your Own Adventure</div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://www.visittrinity.ie/" target="_blank">Trinity College &amp; Book of Kells</a> <span class="badge price">€19–39</span> <span class="badge time">45 min–2 hrs</span> <span class="badge brian">Brian's pick</span></div>
+        <div class="activity-desc">€19 gets you a 45-min Trinity Trails campus tour. €39 adds the Book of Kells and the Old Library — one of the most photographed rooms in the world. Or just walk the grounds for free. Right in city centre.</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">St. Stephen's Green &amp; Grafton Street <span class="badge free">Free</span></div>
+        <div class="activity-desc">Beautiful city park with walking paths and a lake, right off Grafton Street (Dublin's main pedestrian shopping street with buskers). Grab a coffee from one of the nearby cafés and enjoy the green space.</div>
+      </div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://chesterbeatty.ie/visit/" target="_blank">Chester Beatty Library</a> <span class="badge free">Free</span> <span class="badge time">1–2 hrs</span> <span class="badge brian">Brian's pick</span></div>
+        <div class="activity-desc">One of Europe's best small museums — rare manuscripts, Asian art, Islamic calligraphy. Free admission (€10 suggested donation). Located at Dublin Castle grounds; confirm access during the EU Presidency closure. Open Tue–Sun.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Evening — Dinner &amp; Night Out</div>
+      <div class="activity food">
+        <div class="activity-title">Dinner: The Pig's Ear or Chimac <span class="badge price">€20–35</span></div>
+        <div class="activity-desc"><strong>The Pig's Ear</strong> — elevated gastropub, hearty Irish dishes, relaxed vibe, right in city centre. Or <strong>Chimac</strong> — buzzy Korean fried chicken spot, great for a group.</div>
+      </div>
+      <div class="activity nightlife">
+        <div class="activity-title">Night options</div>
+        <div class="activity-desc">
+          <strong>Pitch Dublin</strong> (Dawson Street) — simulation golf bar with 10 bays, tracking tech, drinks — great group activity.<br>
+          <strong>The Laughter Lounge</strong> — Ireland's biggest comedy club, check for Monday shows.<br>
+          <strong>O'Donoghue's</strong> — Another legendary trad music pub if you want a mellower evening.<br>
+          <strong>Palace Bar</strong> (Fleet Street) — Beautiful old pub dating to 1823 with a whiskey bar inside.
+        </div>
+      </div>
+    </div>
+
+    <div class="pro-tip"><strong>Tip:</strong> If you're interested in combining attractions, check the <a href="https://gocity.com/en/dublin" target="_blank">Go City Dublin Pass</a> (€79–124). Could save money if you hit 4+ paid attractions. Do the math for your picks.</div>
+
+    <div class="alternatives">
+      <div class="alternatives-title">Other options if you have time</div>
+      <ul>
+        <li><strong>Saint Patrick's Cathedral</strong> — €11, iconic, 1 hour</li>
+        <li><strong>Phoenix Park</strong> — Massive city park (3x Central Park), free roaming deer, Áras an Uachtaráin</li>
+        <li><strong>City Kayaking on the Liffey</strong> — €40–60, a unique way to see Dublin from the water</li>
+        <li><strong>Malahide Castle</strong> — €25, beautiful castle 12 miles north (half-day trip)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DAY 3: GALWAY ============ -->
+<div class="day-section" id="day3">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">3</div>
+    <div class="day-meta">
+      <h2>Tuesday, May 13 — Dublin → Galway</h2>
+      <div class="day-sub">Road trip west, afternoon &amp; evening in Galway city</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+    <div class="lodging-bar"><span class="icon">🏨</span> <strong>The Snug Townhouse</strong> — Galway &nbsp;·&nbsp; Confirmation: 6721327608 (Mark booked)</div>
+
+    <div class="time-block">
+      <div class="time-label">Morning — Drive to Galway</div>
+      <div class="activity driving">
+        <div class="activity-title">Dublin → Galway <span class="badge time">~2 hr 15 min</span></div>
+        <div class="activity-desc">M6 motorway most of the way. Straightforward drive. Leave by 9–10 AM to have the full afternoon in Galway.</div>
+      </div>
+      <div class="activity">
+        <div class="activity-title">Optional stop: Clonmacnoise <span class="badge price">€8</span> <span class="badge time">45 min–1 hr</span></div>
+        <div class="activity-desc">Ancient monastic site about halfway between Dublin and Galway, just off the M6. Atmospheric 6th-century ruins, Celtic crosses, and a visitor centre. Quick detour if you're not in a rush. Adds ~30 min to the drive.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Afternoon — Explore Galway City</div>
+      <div class="activity outdoor">
+        <div class="activity-title">Latin Quarter, Shop Street &amp; Spanish Arch <span class="badge free">Free</span></div>
+        <div class="activity-desc">The medieval heart of Galway — colorful storefronts, street buskers, independent shops. Walk from Eyre Square down Shop Street to the Spanish Arch on the River Corrib. The Spanish Arch area is a local hangout when the sun's out. Very lively in May.</div>
+      </div>
+      <div class="activity food">
+        <div class="activity-title">Late lunch: The Dough Bros <span class="badge price">€12–18</span></div>
+        <div class="activity-desc">Ranked in the top 15 pizzerias in the world. Neapolitan-style with an Irish twist. Casual, fun, perfect post-drive fuel.</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">Walk along Salthill Promenade <span class="badge free">Free</span></div>
+        <div class="activity-desc">2 km seaside walk from Galway city out to Salthill — locals walk it constantly. Beautiful views of Galway Bay. Tradition is to kick the wall at the end. Takes about 30–40 min each way, or grab a bus back.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Evening — Dinner &amp; Trad Music</div>
+      <div class="activity food">
+        <div class="activity-title">Dinner: Hooked or Ard Bia at Nimmos <span class="badge price">€20–35</span></div>
+        <div class="activity-desc"><strong>Hooked</strong> — Family-run, best seafood in Galway, cozy, approachable pricing. <strong>Ard Bia at Nimmos</strong> — Historic harbor-side building, elevated comfort food, great atmosphere. Eat around 6:30–7 PM to have time for the music sessions.</div>
+      </div>
+      <div class="activity nightlife">
+        <div class="activity-title">Traditional Music Pub Crawl <span class="badge free">Free entry</span></div>
+        <div class="activity-desc">
+          Galway is Ireland's trad music capital. Sessions start around 9–9:30 PM. Hit these in order:<br><br>
+          <strong>1. Tig Chóilí</strong> (Mainguard St) — Famous for impromptu sessions where big-name musicians drop in. Sessions at 6 PM &amp; 9:30 PM.<br>
+          <strong>2. Tigh Neachtain</strong> (Cross St / Quay St corner) — Open since 1894. Beautiful old wooden pub, one of the best sessions in Connaught.<br>
+          <strong>3. The Crane Bar</strong> (Sea Road) — Live music 7 nights a week, upstairs and down. Excellent Guinness.<br><br>
+          Most pubs serve drinks for €5–8/pint. Sessions are free — just buy a pint and enjoy.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DAY 4: CLIFFS & ARAN ISLANDS ============ -->
+<div class="day-section" id="day4">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">4</div>
+    <div class="day-meta">
+      <h2>Wednesday, May 14 — Aran Islands &amp; Cliffs of Moher</h2>
+      <div class="day-sub">Full-day adventure along the Wild Atlantic Way</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+    <div class="lodging-bar"><span class="icon">🏨</span> <strong>The Snug Townhouse</strong> — Second night in Galway</div>
+
+    <div class="pro-tip"><strong>Recommended:</strong> Book a combined Aran Islands + Cliffs of Moher day tour from Galway. Everything's coordinated — transport, ferries, island time, cliff access — for about €80/person. Much less stressful than DIY.</div>
+
+    <div class="time-block">
+      <div class="time-label">Full Day — Guided Tour (Recommended)</div>
+      <div class="activity outdoor">
+        <div class="activity-title"><a href="https://www.aranislandferries.com/day-tours/galway-city/cliffs-of-moher" target="_blank">Combined Tour: Aran Islands + Cliffs of Moher</a> <span class="badge price">~€80/person</span> <span class="badge time">All day</span></div>
+        <div class="activity-desc">
+          <strong>~9:00 AM</strong> — Depart Galway. Drive south through The Burren.<br>
+          <strong>~10:30 AM</strong> — Stop at <strong>Poulnabrone Dolmen</strong> in The Burren (free, 5,800-year-old portal tomb in an otherworldly limestone landscape — 20-min stop).<br>
+          <strong>~11:00 AM</strong> — Arrive Doolin, board ferry to <strong>Inis Oírr (Inisheer)</strong>, the smallest Aran Island.<br>
+          <strong>12:00–4:30 PM</strong> — Explore Inisheer. Rent a bike (€8–10) and cycle the island: O'Brien's Castle ruins, the sunken church, a rusting shipwreck on the beach, beautiful stone-walled pastures, and possible dolphin sightings from the shore.<br>
+          <strong>~4:30 PM</strong> — Ferry back to Doolin.<br>
+          <strong>~5:00 PM</strong> — Cliff cruise along the base of the <strong>Cliffs of Moher</strong> (often included in tour package). 214 meters of sheer cliff face from the water — spectacular.<br>
+          <strong>~7:00 PM</strong> — Return to Galway.
+        </div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Evening — Back in Galway</div>
+      <div class="activity food">
+        <div class="activity-title">Dinner: Rúibín or Brasserie on the Corner <span class="badge price">€25–40</span></div>
+        <div class="activity-desc"><strong>Rúibín</strong> — Modern restaurant overlooking the docklands, great views. <strong>Brasserie on the Corner</strong> — Often called Galway's best restaurant, steak &amp; seafood with a great wine list. You've earned a good meal after a long day.</div>
+      </div>
+      <div class="activity nightlife">
+        <div class="activity-title">Late drinks at Taaffes Bar or Monroe's</div>
+        <div class="activity-desc">Both have daily trad sessions. Monroe's has free live music 7 nights. Taaffes is more intimate. Late bars in Galway stay open until 2 AM on weekends.</div>
+      </div>
+    </div>
+
+    <div class="alternatives">
+      <div class="alternatives-title">DIY alternative (if you prefer driving yourselves)</div>
+      <ul>
+        <li>Drive to Cliffs of Moher directly (~1.5 hrs from Galway). Entry: €7–10/person.</li>
+        <li>Stop at Poulnabrone Dolmen in The Burren on the way (free).</li>
+        <li>Visit Doolin village and its trad music pubs (Gus O'Connor's, McDermott's).</li>
+        <li>Skip Aran Islands and do the Burren + Cliffs + Doolin loop instead.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DAY 5: RING OF KERRY ============ -->
+<div class="day-section" id="day5">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">5</div>
+    <div class="day-meta">
+      <h2>Thursday, May 15 — Galway → Ring of Kerry → Cork</h2>
+      <div class="day-sub">Epic scenic drive through Kerry, overnight in Cork</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+    <div class="lodging-bar"><span class="icon">🏨</span> <strong>Maldron Hotel</strong> — Cork &nbsp;·&nbsp; Confirmation: 299710638 (Lauren booked)</div>
+
+    <div class="pro-tip"><strong>Key logistics:</strong> This is a big driving day. Leave Galway early (7:30–8:00 AM). Drive clockwise around the Ring of Kerry to avoid tour buses (they all go counterclockwise). Be selective with stops — you can't do everything.</div>
+
+    <div class="time-block">
+      <div class="time-label">Morning — Drive South</div>
+      <div class="activity driving">
+        <div class="activity-title">Galway → Killorglin (start of Ring of Kerry) <span class="badge time">~2 hr 30 min</span></div>
+        <div class="activity-desc">Head south on the N18/N21. Fill up on fuel in Killarney or Killorglin before starting the Ring.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Mid-Day — Ring of Kerry Scenic Drive</div>
+      <div class="activity outdoor">
+        <div class="activity-title">Ring of Kerry Loop <span class="badge free">Free</span> <span class="badge time">3.5 hrs driving + stops</span></div>
+        <div class="activity-desc">179 km (111 miles) of Ireland's most dramatic coastal scenery. Narrow, winding roads — the driver won't be bored. Here are the must-stop highlights going clockwise:</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">Ladies View <span class="badge free">Free</span></div>
+        <div class="activity-desc">The most famous viewpoint on the Ring. Panoramic views over the Killarney Lakes. There's a café here for coffee and a snack. Named after Queen Victoria's ladies-in-waiting who loved the spot. 20–30 minutes.</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">Moll's Gap <span class="badge free">Free</span></div>
+        <div class="activity-desc">Mountain pass with sweeping views. Small café for a quick coffee or pastry. Often combined with the Ladies View stop. 15–20 minutes.</div>
+      </div>
+      <div class="activity food">
+        <div class="activity-title">Lunch: Kenmare or roadside café <span class="badge price">€10–18</span></div>
+        <div class="activity-desc">Kenmare is a charming town roughly at the midpoint. Good quick lunch options. Or grab something at the Ladies View café or The Thatch Cottage in Cahirciveen.</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">Scenic stops: Sneem, Waterville, Caherdaniel <span class="badge free">Free</span></div>
+        <div class="activity-desc">Quick photo stops at colorful coastal villages. Sneem is particularly charming. Don't linger too long at any one — keep moving to stay on schedule.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Late Afternoon — Killarney National Park</div>
+      <div class="activity outdoor">
+        <div class="activity-title">Torc Waterfall <span class="badge free">Free</span> <span class="badge time">30 min</span></div>
+        <div class="activity-desc">20-meter waterfall at the base of Torc Mountain. Short walk from the car park. Parking is very limited (~25 spots) — if it's full, park at Muckross House and walk. Best quick nature stop before heading to Cork.</div>
+      </div>
+      <div class="activity">
+        <div class="activity-title">Ross Castle (exterior) <span class="badge free">Free</span></div>
+        <div class="activity-desc">15th-century castle on Lough Leane. Full guided tour is €5 but takes 1.5–2 hours. For time's sake, a quick walk around the exterior and lakeshore (free, 15 min) gives you great photos and a taste of the place.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Evening — Cork</div>
+      <div class="activity driving">
+        <div class="activity-title">Killarney → Cork <span class="badge time">~1 hr 15 min</span></div>
+        <div class="activity-desc">Arrive in Cork around 7:00–7:30 PM. Check in at Maldron Hotel.</div>
+      </div>
+      <div class="activity food">
+        <div class="activity-title">Dinner on Oliver Plunkett Street <span class="badge price">€15–30</span></div>
+        <div class="activity-desc"><strong>The Oliver Plunkett</strong> — Live music Wed–Sun, hearty pub food, quintessential Cork atmosphere. Or <strong>Elbow Lane Brew &amp; Smoke House</strong> — in-house nano brewery with BBQ-style food. Great craft beers.</div>
+      </div>
+      <div class="activity nightlife">
+        <div class="activity-title"><a href="https://franwellbar.com/" target="_blank">Franciscan Well Brewery</a> <span class="badge price">€15–25</span></div>
+        <div class="activity-desc">Built on a 13th-century monastery site. Craft beers, wood-fired pizza, beer garden, and the original well still on-site. Cork institution. Open until 11:30 PM (12:30 AM Fri–Sat).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DAY 6: CORK → KILKENNY ============ -->
+<div class="day-section" id="day6">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">6</div>
+    <div class="day-meta">
+      <h2>Friday, May 16 — Cork → Kilkenny</h2>
+      <div class="day-sub">Morning in Cork, drive east, Friday night in medieval Kilkenny</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+    <div class="lodging-bar"><span class="icon">🏨</span> <strong>Kilmore Guesthouse</strong> — Kilkenny &nbsp;·&nbsp; Confirmation: 5238590565 (Mark booked)</div>
+
+    <div class="time-block">
+      <div class="time-label">Morning — Cork City Highlights</div>
+      <div class="activity food">
+        <div class="activity-title"><a href="https://www.corkcity.ie/en/english-market/" target="_blank">English Market</a> <span class="badge free">Free entry</span> <span class="badge time">1–1.5 hrs</span></div>
+        <div class="activity-desc">World-famous covered market, open Mon–Sat 8:30 AM – 6:00 PM. Have breakfast at The Farmgate upstairs — sit on the balcony overlooking the market stalls. Browse specialty cheeses, fresh produce, and artisan food. This is Cork's crown jewel.</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">River Lee Walk &amp; St. Fin Barre's Cathedral <span class="badge free">Free</span> <span class="badge time">45 min</span></div>
+        <div class="activity-desc">Casual riverside stroll through the city centre. Pass by St. Fin Barre's Cathedral (beautiful Gothic exterior, notable spires and gargoyles). Quick photo stop — no need to go inside unless you really want to.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Midday — Drive to Kilkenny</div>
+      <div class="activity driving">
+        <div class="activity-title">Cork → Kilkenny <span class="badge time">~1 hr 50 min</span></div>
+        <div class="activity-desc">Leave Cork by 11:00 AM. Arrive Kilkenny early afternoon. Scenic drive through the Irish midlands. Check in at Kilmore Guesthouse.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Afternoon — Kilkenny Exploration</div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://www.kilkennycastle.ie/tickets-and-times/" target="_blank">Kilkenny Castle</a> <span class="badge price">€8–12</span> <span class="badge time">1–1.5 hrs</span></div>
+        <div class="activity-desc">12th-century Norman castle right in the city centre. Self-guided tour (€8) or guided (€12). Beautiful formal gardens and parkland around it. Open 9:30 AM – 5:30 PM in May.</div>
+      </div>
+      <div class="activity">
+        <div class="activity-title"><a href="https://www.stcanicescathedral.ie/" target="_blank">St. Canice's Cathedral &amp; Round Tower</a> <span class="badge price">€4 tower</span> <span class="badge time">45 min</span></div>
+        <div class="activity-desc">Medieval cathedral with Ireland's second-tallest round tower. Climb the 100-foot tower for the best views in Kilkenny. €4 for the tower climb (ages 12+ only). The walk from the castle to the cathedral takes you through the Medieval Mile — the heart of old Kilkenny.</div>
+      </div>
+      <div class="activity">
+        <div class="activity-title">Walk the Medieval Mile <span class="badge free">Free</span></div>
+        <div class="activity-desc">The stretch between Kilkenny Castle and St. Canice's Cathedral runs through High Street and Parliament Street — lined with medieval buildings, craft shops, and pubs. Self-guided stroll or book a walking tour (~€15–20).</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Evening — Friday Night in Kilkenny</div>
+      <div class="activity food">
+        <div class="activity-title">Dinner: Kyteler's Inn or Matt the Millers <span class="badge price">€20–30</span></div>
+        <div class="activity-desc"><strong>Kyteler's Inn</strong> — Set in a medieval building, atmospheric, great cocktails and food. <strong>Matt the Millers</strong> — Overlooks the River Nore, live trad &amp; contemporary music, great food. Both excellent for a Friday night.</div>
+      </div>
+      <div class="activity nightlife">
+        <div class="activity-title">Friday night pub crawl</div>
+        <div class="activity-desc">
+          Kilkenny punches above its weight for nightlife. Hit these:<br><br>
+          <strong>Sullivan's Tap Room</strong> — Craft beer specialist, casual vibe.<br>
+          <strong>Biddy Early's</strong> — Creative cocktail menu, upscale drinks.<br>
+          <strong>Kyteler's Inn</strong> — If you didn't eat here, drop in for a drink in the medieval cellar bar.<br>
+          <strong>John Street</strong> — The main nightlife strip with several bars and late venues.
+        </div>
+      </div>
+    </div>
+
+    <div class="alternatives">
+      <div class="alternatives-title">Optional: Smithwick's Experience</div>
+      <ul>
+        <li><a href="https://www.smithwicksexperience.com/visit" target="_blank">Smithwick's Experience</a> — €25/person, 1-hour guided tour + complimentary pint. On Parliament Street. Could do this afternoon instead of St. Canice's if you're more into beer than cathedrals.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DAY 7: HOME ============ -->
+<div class="day-section" id="day7">
+  <div class="day-header" onclick="toggleDay(this)">
+    <div class="day-number">7</div>
+    <div class="day-meta">
+      <h2>Saturday, May 17 — Kilkenny → Dublin → Home</h2>
+      <div class="day-sub">Morning walk, drive to airport, fly home</div>
+    </div>
+    <div class="day-toggle">▼</div>
+  </div>
+  <div class="day-body">
+
+    <div class="time-block">
+      <div class="time-label">Morning — Last Look at Kilkenny</div>
+      <div class="activity food">
+        <div class="activity-title">Breakfast in town <span class="badge price">€8–12</span></div>
+        <div class="activity-desc">Grab breakfast at a café on High Street or John Street. Kilkenny has a good café scene. Take it easy — you have a bit of time before the drive.</div>
+      </div>
+      <div class="activity outdoor">
+        <div class="activity-title">Morning stroll: Castle Park &amp; River Nore <span class="badge free">Free</span></div>
+        <div class="activity-desc">Quick walk through Kilkenny Castle's gardens and along the River Nore. Peaceful way to close out the trip. 20–30 minutes.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Midday — Drive to Dublin Airport</div>
+      <div class="activity driving">
+        <div class="activity-title">Kilkenny → Dublin Airport <span class="badge time">~1 hr 30 min</span></div>
+        <div class="activity-desc">Leave Kilkenny by 12:00–12:30 PM. Allow extra time for returning the rental car and getting through security. Flight departs at 3:25 PM — aim to be at the airport by 1:30 PM.</div>
+      </div>
+    </div>
+
+    <div class="time-block">
+      <div class="time-label">Flights Home</div>
+      <div class="activity driving">
+        <div class="activity-title">Dublin → Raleigh <span class="badge time">Departs 3:25 PM</span></div>
+        <div class="activity-desc">Arrives Raleigh at 6:55 PM local time. You'll be home by dinner, full of stories and probably craving another Guinness.</div>
+      </div>
+    </div>
+
+    <div class="pro-tip"><strong>Last-minute shopping:</strong> Dublin Airport has a good duty-free section after security. Grab Jameson, Tayto crisps, or Irish chocolate as souvenirs.</div>
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<div class="footer">
+  <p>Ireland 2026 — researched &amp; built Feb 2026</p>
+  <p style="margin-top:4px;">Prices are approximate and based on 2025/2026 sources. Always confirm ahead of your trip.</p>
+</div>
+
+<script>
+function toggleDay(header) {
+  const section = header.parentElement;
+  section.classList.toggle('open');
+}
+
+// Open all sections by default
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.day-section').forEach(s => s.classList.add('open'));
+
+  // Smooth scroll for nav
+  document.querySelectorAll('.day-nav a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Highlight active nav on scroll
+  const sections = document.querySelectorAll('.day-section, #overview');
+  const navLinks = document.querySelectorAll('.day-nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.day-nav a[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+});
+</script>
+
+</body>
+</html>
